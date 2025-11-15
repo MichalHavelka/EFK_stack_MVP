@@ -1,5 +1,5 @@
 resource "aws_vpc" "vpc" {
-  cidr_block = var.vpc-cidr
+  cidr_block       = var.vpc-cidr
   instance_tenancy = "default"
 
   tags = merge(
@@ -20,10 +20,10 @@ resource "aws_security_group" "sg" {
   }
 
   egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = merge(
@@ -33,14 +33,14 @@ resource "aws_security_group" "sg" {
 }
 
 resource "aws_subnet" "subnet" {
-  vpc_id = aws_vpc.vpc.id
+  vpc_id            = aws_vpc.vpc.id
   availability_zone = var.availability-zone
-  cidr_block = var.subnet-cidr
+  cidr_block        = var.subnet-cidr
 
   tags = merge(
     local.default_tags,
     { Name = "subnet1-${local.stack}" }
- )
+  )
 }
 
 resource "aws_internet_gateway" "igw" {

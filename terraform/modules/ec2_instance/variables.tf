@@ -12,7 +12,7 @@ variable "instance_type" {
 
 variable "vpc_security_group_ids" {
   description = "Security group of vpc"
-  type        = list
+  type        = list(any)
   default     = []
 }
 
@@ -48,25 +48,25 @@ variable "volume_size" {
 
 variable "filter_name" {
   description = "ami name to filter"
-  type        = list
+  type        = list(any)
   default     = ["debian-13-amd64-*"]
 }
 
 variable "filter_architecture" {
   description = "list of architectures to filter"
-  type        = list
+  type        = list(any)
   default     = ["x86_64"]
 }
 
 variable "filter_virt-type" {
   description = "list of virtualization types to filter"
-  type        = list
+  type        = list(any)
   default     = ["hvm"]
 }
 
 variable "owners" {
   description = "list of ami owners"
-  type        = list
+  type        = list(any)
   default     = ["136693071363"]
 }
 
