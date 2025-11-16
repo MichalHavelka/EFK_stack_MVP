@@ -26,6 +26,8 @@ resource "aws_instance" "this" {
   subnet_id                   = var.subnet_id
   associate_public_ip_address = var.associate_public_ip_address
   key_name                    = var.key_name
+  private_ip                  = var.private_ip
+  user_data                   = var.user_data
 
   root_block_device {
     volume_type = var.volume_type

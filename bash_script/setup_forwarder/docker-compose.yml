@@ -1,0 +1,40 @@
+services:
+  fluent-bit-01:
+    container_name: fluent-bit-01
+    image: fluent/fluent-bit
+    ports:
+      - 24224:24224
+    volumes:
+      - ./fluent-bit.yaml:/fluent-bit/etc/fluent-bit.yaml
+    restart: unless-stopped
+    command: -c /fluent-bit/etc/fluent-bit.yaml
+  webserver-01:
+    container_name: dummy_webserver-01
+    image: nginx:1.29.3
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "192.168.10.42:24224"
+        fluentd-async: "true"
+        tag: dummy-webserver-01
+    depends_on:
+      - fluent-bit-01
+  webserver-02:
+    container_name: dummy_webserver-02
+    image: nginx:1.29.3
+    ports:
+      -  81:80
+      - 444:443
+    restart: unless-stopped
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "192.168.10.42:24224"
+        fluentd-async: "true"
+        tag: dummy-webserver-02
+    depends_on:
+      - fluent-bit-01

@@ -75,4 +75,14 @@ variable "tags" {
   type        = map(string)
 }
 
+variable "user_data" {
+  description = "Optional user_data input for init scripts"
+  type        = string
+  default     = null
+}
 
+variable "private_ip" {
+  description = "Private IP assigned to EC2 instance in scope of subnet CIDR"
+  type        = string
+  default     = null
+}

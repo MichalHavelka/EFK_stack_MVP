@@ -1,0 +1,31 @@
+services:
+  elasticsearch:
+    container_name: es-01
+    image: docker.elastic.co/elasticsearch/elasticsearch-wolfi:9.2.1
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    restart: unless-stopped
+  kibana:
+    container_name: kibana-01
+    image: docker.elastic.co/kibana/kibana:9.2.1
+    ports:
+      - 5601:5601
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_PUBLICBASEURL=http://18.195.148.147:5601
+  fluent-bit:
+    container_name: fluent-bit
+    image: fluent/fluent-bit
+    ports:
+      - 24224:24224
+    volumes:
+      - ./fluent-bit.yaml:/fluent-bit/etc/fluent-bit.yaml
+      - ./parsers.yaml:/fluent-bit/etc/parsers.yaml
+    restart: unless-stopped
+    command: -c /fluent-bit/etc/fluent-bit.yaml
