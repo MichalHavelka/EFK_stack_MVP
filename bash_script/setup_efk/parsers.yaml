@@ -1,5 +1,9 @@
 parsers:
-  - name: docker
-    format: json
+  - name: nginx
+    format: regex
     time_key: time
-    time_format: '%Y-%m-%dT%H:%M:%S %z'
+    regex: '^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)"(?: "(?<http_x_forwarded_for>[^\"]*)")?)?.*$'
+    time_format: '%d/%b/%Y:%H:%M:%S %z'
+  - name: monitoring_stack
+    format: logfmt
+    logfmt_no_bare_keys: true

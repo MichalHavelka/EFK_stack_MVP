@@ -1,0 +1,16 @@
+datasources:
+ - name: prometheus
+   type: prometheus
+   typeName: Prometheus
+   access: proxy
+   url: http://prometheus-01:9090
+   user: ''
+   uid: 'P1809F7CD0C75ACF3'
+   database: ''
+   basicAuth: false
+   isDefault: false
+   jsonData:
+     pdcInjected: false
+     tlsSkipVerify: true
+   readOnly: false
+

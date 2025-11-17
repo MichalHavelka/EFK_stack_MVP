@@ -9,22 +9,67 @@ pipeline:
   inputs:
     - name: kafka
       brokers: 192.168.10.40:9092
-      topics: jamf-mvp.logging.nginx.test.json
-      tag: 'docker'
+      topics:  logging.jamf.mvp.test
       poll_ms: 100
+      format: json
+      tag: kafka
+    - name: fluentbit_metrics
+      tag: internal_metrics
+      scrape_interval: 2
 
   filters:
-    - name: parser
-      match: '*'
-      key_name: payload
-      parser: docker
+# Remove payload json field added by kafka
+     - name: nest
+       match: kafka
+       operation: lift
+       nested_under: payload
+# Retrieve tags from forwarder to parse logs
+     - name: rewrite_tag
+       match: kafka
+       emitter_name: re_emitted
+       rule: _original_tag ^(.*)$ $1 false
+# Remove original tag, in this case tag "kafka",container_id, fluent-bit linuxtime timestamp and remove forward slash from docker_name field
+     - name: modify
+       match: '*'
+       condition: Key_exists _original_tag
+       remove:
+         - _original_tag
+         - container_id
+         - "@timestamp"
+# strip prefix forwardslash on container_name field
+     - name: lua
+       match: '*'
+       script: /scripts/strip_prefix_slash.lua
+       call: strip_prefix_slash
+# use logfmt parser on key=value log formats
+     - name: parser
+       match_regex: '(prometheus|grafana|blackbox)'
+       key_name: log
+       parser: monitoring_stack
+       reserve_data: on
+# logfmt doesnt support specification of timestamp so its needed here
+     - name: modify
+       match_regex: '(prometheus|grafana|blackbox)'
+       hard_rename: t @timestamp
+       hard_rename: time @timestamp
+# use regex on nginx log format
+     - name: parser
+       match: nginx
+       key_name: log
+       parser: nginx
+       reserve_data: on
 
+# leave rest as whole log field and send to elastic
   outputs:
     - name: es
       match: '*'
       host: elasticsearch
       port: 9200
-      index: 'jamf-mvp.logging.nginx.test.json'
-      type: 'nginx'
+      index:  logging.jamf.mvp.test16
+      type: 'logging'
       tls:   off
       suppress_type_name: on
+    - name: prometheus_exporter
+      match: 'internal_metrics'
+      host: 0.0.0.0
+      port: 2021

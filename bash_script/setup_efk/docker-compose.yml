@@ -18,14 +18,41 @@ services:
     restart: unless-stopped
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - SERVER_PUBLICBASEURL=http://18.195.148.147:5601
+#      - SERVER_PUBLICBASEURL=http://18.195.148.147:5601
   fluent-bit:
     container_name: fluent-bit
     image: fluent/fluent-bit
     ports:
       - 24224:24224
+      - 2021:2021
     volumes:
       - ./fluent-bit.yaml:/fluent-bit/etc/fluent-bit.yaml
       - ./parsers.yaml:/fluent-bit/etc/parsers.yaml
+      - ./scripts/:/scripts/
     restart: unless-stopped
     command: -c /fluent-bit/etc/fluent-bit.yaml
+  elasticsearch_exporter:
+    container_name: elasticsearch_exporter
+    image: prometheuscommunity/elasticsearch-exporter:v1.9.0
+    ports:
+      - 9114:9114
+    restart: unless-stopped
+    command:
+     - '--es.uri=http://elasticsearch:9200'
+  cadvisor-01:
+    container_name: cadvisor-01
+    image: gcr.io/cadvisor/cadvisor:v0.52.0
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "192.168.10.42:24224"
+        fluentd-async: "true"
+        tag: cadvisor-01

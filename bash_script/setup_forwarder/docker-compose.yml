@@ -4,8 +4,10 @@ services:
     image: fluent/fluent-bit
     ports:
       - 24224:24224
+      - 2021:2021
     volumes:
       - ./fluent-bit.yaml:/fluent-bit/etc/fluent-bit.yaml
+      - ./scripts/append_tag.lua:/scripts/append_tag.lua
     restart: unless-stopped
     command: -c /fluent-bit/etc/fluent-bit.yaml
   webserver-01:
@@ -20,9 +22,7 @@ services:
       options:
         fluentd-address: "192.168.10.42:24224"
         fluentd-async: "true"
-        tag: dummy-webserver-01
-    depends_on:
-      - fluent-bit-01
+        tag: nginx
   webserver-02:
     container_name: dummy_webserver-02
     image: nginx:1.29.3
@@ -35,6 +35,4 @@ services:
       options:
         fluentd-address: "192.168.10.42:24224"
         fluentd-async: "true"
-        tag: dummy-webserver-02
-    depends_on:
-      - fluent-bit-01
+        tag: nginx

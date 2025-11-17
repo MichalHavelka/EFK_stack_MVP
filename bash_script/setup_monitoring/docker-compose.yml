@@ -1,0 +1,71 @@
+services:
+  prometheus-01:
+    container_name: prometheus-01
+    image: prom/prometheus:v3.7.3
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/http.yml:/etc/prometheus/http.yml
+      - ./prometheus/cadvisor.yml:/etc/prometheus/cadvisor.yml
+    command:
+      - '--web.enable-lifecycle'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--enable-feature=expand-external-labels'
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "192.168.10.42:24224"
+        fluentd-async: "true"
+        tag: prometheus
+  grafana-01:
+    container_name: grafana-01
+    image: grafana/grafana:12.2.1
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    environment:
+      GF_PATHS_PROVISIONING: '/etc/grafana/provisioning'
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "192.168.10.42:24224"
+        fluentd-async: "true"
+        tag: grafana
+  cadvisor-01:
+    container_name: cadvisor-01
+    image: gcr.io/cadvisor/cadvisor:v0.52.0
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "192.168.10.42:24224"
+        fluentd-async: "true"
+        tag: cadvisor
+  blackbox-01:
+    container_name: blackbox-01
+    image: prom/blackbox-exporter:v0.27.0
+    ports:
+      - 9115:9115
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/blackbox.yml:/config/blackbox.yml
+    command:
+      - '--config.file=/config/blackbox.yml'
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "192.168.10.42:24224"
+        fluentd-async: "true"
+        tag: blackbox

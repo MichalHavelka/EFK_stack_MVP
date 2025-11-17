@@ -19,16 +19,15 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
   kafka_init-topics:
     container_name: kafka_init-topics
-    #image: bitnami/kafka:latest
     image: quay.io/strimzi/kafka:latest-kafka-4.1.1
-    command: [ "sh", "-c", "bin/kafka-topics.sh --create --topic jamf-mvp.logging.nginx.test.json --bootstrap-server kafka-01:9092"]
+    command: [ "sh", "-c", "bin/kafka-topics.sh --create --topic logging.jamf.mvp.test --bootstrap-server kafka-01:9092"]
     depends_on:
       kafka-01:
         condition: service_started
   kafka-magic:
-    image: "digitsy/kafka-magic"
+    image: digitsy/kafka-magic
     ports:
-      - "8080:80"
+      - 8081:80
     volumes:
       - ./kafka-magic/:/config
     environment:
@@ -37,3 +36,31 @@ services:
       KMAGIC_CONFIG_STORE_TYPE: "file"
       KMAGIC_CONFIG_STORE_CONNECTION: "Data Source=/config/KafkaMagicConfig.db;"
       KMAGIC_CONFIG_ENCRYPTION_KEY: "nokey"
+  kafka-exporter:
+    container_name: kafka-exporter
+    image: danielqsj/kafka-exporter:v1.9.0
+    ports:
+      - 9308:9308
+    command: ["--kafka.server=kafka-01:9092"]
+    restart: unless-stopped
+    depends_on:
+      kafka-01:
+        condition: service_started
+  cadvisor-01:
+    container_name: cadvisor-01
+    image: gcr.io/cadvisor/cadvisor:v0.52.0
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "192.168.10.42:24224"
+        fluentd-async: "true"
+        tag: cadvisor-01
