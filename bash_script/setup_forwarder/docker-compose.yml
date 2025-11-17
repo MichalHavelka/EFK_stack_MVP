@@ -36,3 +36,8 @@ services:
         fluentd-address: "192.168.10.42:24224"
         fluentd-async: "true"
         tag: nginx
+  dummy-caller:
+    container_name: dummy_caller
+    image: debian:trixie-slim
+    restart: unless-stopped
+    command: /bin/bash -c 'apt update && apt install -y curl && while true; do curl http://webserver-01:80; curl http://webserver-02:80; curl -X POST http://192.168.10.42:9090/-/reload; curl -X POST http://192.168.10.42:9115/-/reload; sleep 3; done'
