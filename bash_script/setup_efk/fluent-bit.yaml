@@ -58,6 +58,7 @@ pipeline:
        key_name: log
        parser: nginx
        reserve_data: on
+       preserve_key: on
 
 # leave rest as whole log field and send to elastic
   outputs:
@@ -65,7 +66,7 @@ pipeline:
       match: '*'
       host: elasticsearch
       port: 9200
-      index:  logging.jamf.mvp.test16
+      index:  logging.jamf.mvp.test17
       type: 'logging'
       tls:   off
       suppress_type_name: on
