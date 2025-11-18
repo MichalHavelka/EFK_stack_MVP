@@ -63,12 +63,17 @@ prolly makes more sense to add 1 more ec2 instance for kafka alone
 - When using purely fluent-bit -> fluent-bit/fluentd , it seems you can transfer tags  from forwarder to aggregator but with kafka its a bit more tricky, one needs to create new field with value of the current tag and at the destination ( the aggregator ) rewrite new tag added by input with value of this field since kafka output doesnt support any type of tag retention
 
 - for scalability it would be good idea to do more of a deep dive into fluent-bit multithreading, i got the basic concept but it seems like a bit larger topic to understand in more detailed matter.
+- adding specific compression type gzip between fluent-bit producer and kafka
 
 ## Elastic & Kibana
 - using simple elastic deployment with 1 replica and with security turned off, same with kibana.
 - This whoule solution is mainly focused, since its MVP for interview, to spin up all services without any residual data so kibana dashboards need to be somehow fed on start to it, for elastic i am just gonna leave it empty, its gonna fill will logs pretty fast after adding more log sources.
 
 - Tought about using elasticsearch/kibana log parsing pipelines as well but it seems to not be the recommanded solution as you want fluent-bit as your tool of choice to take care of this and elastic should focus on its searching, analytics side of things, otherwise i would probably end up with fluent-bit doing almost nothing and heavily utilised elasticsearch.
+
+- for kibana dashboards i am not really sure how to preserve them without having dedicated persistant volume of the elasticsearch as kibana saves all here data there which is not ideal for my current setup
+
+- would be probably the best to add webserver curl caller to all ec2 instances, currently dashboards seems a bit dull since there is always only 1 public IP making the requests, also would be good to add mabye some dummy user agents etc.
 
 ## Grafana & Prometheus
 - will try adding multiple exporters, use imported dashboards from grafana labs

@@ -20,7 +20,7 @@ services:
   kafka_init-topics:
     container_name: kafka_init-topics
     image: quay.io/strimzi/kafka:latest-kafka-4.1.1
-    command: [ "sh", "-c", "bin/kafka-topics.sh --create --topic logging.jamf.mvp.test --bootstrap-server kafka-01:9092"]
+    command: [ "sh", "-c", "bin/kafka-topics.sh --create --topic logging.jamf.mvp.test --config compression.type=gzip --bootstrap-server kafka-01:9092"]
     depends_on:
       kafka-01:
         condition: service_started
@@ -64,3 +64,8 @@ services:
         fluentd-address: "192.168.10.42:24224"
         fluentd-async: "true"
         tag: cadvisor-01
+  dummy-caller:
+    container_name: dummy_caller
+    image: debian:trixie-slim
+    restart: unless-stopped
+    command: /bin/bash -c 'apt update && apt install -y curl && while true; do curl http://192.168.10.42:80; curl http://192.168.10.42:81; sleep 3; done'

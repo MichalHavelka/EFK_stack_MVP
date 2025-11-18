@@ -3,6 +3,7 @@ service:
   http_listen: 0.0.0.0
   http_port: 2020
   log_level: debug
+  mem_buf_limit: 50MB
 
 pipeline:
   inputs:
@@ -22,6 +23,7 @@ pipeline:
       match: '*'
       brokers: 192.168.10.40:9092
       topics: logging.jamf.mvp.test
+      rdkafka.compression.type: gzip
     - name: prometheus_exporter
       match: internal_metrics
       host: 0.0.0.0
